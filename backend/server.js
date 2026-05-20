@@ -18,7 +18,7 @@ app.post("/describe-image", upload.single("image"), async (req, res) => {
     formData.append("file", req.file.buffer, req.file.originalname);
 
     const response = await axios.post(
-      "http://127.0.0.1:8000/analyze-image",
+      "https://vision-voice-ai.onrender.com/analyze-image",
       formData,
       {
         headers: formData.getHeaders(),
@@ -52,7 +52,7 @@ app.post("/ask-question", upload.single("image"), async (req, res) => {
     );
 
     const response = await axios.post(
-      "http://127.0.0.1:8000/ask-question",
+      "https://vision-voice-ai.onrender.com/ask-question",
       formData,
       {
         headers: formData.getHeaders(),
