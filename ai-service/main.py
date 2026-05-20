@@ -1,3 +1,4 @@
+from fastapi import Form
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
@@ -52,4 +53,27 @@ async def analyze_image(file: UploadFile = File(...)):
 
     return {
         "description": response.text
+    }
+@app.post("/ask-question")
+async def ask_question(
+    file: UploadFile = File(...),
+    question: str = Form(...)
+):
+
+    image = Image.open(file.file)
+
+    prompt = f"""
+    You are helping blind people understand images.
+
+    Answer this question about the image:
+
+    {question}
+
+    Keep the answer short, clear, and conversational.
+    """
+
+    response = model.generate_content([prompt, image])
+
+    return {
+        "answer": response.text
     }

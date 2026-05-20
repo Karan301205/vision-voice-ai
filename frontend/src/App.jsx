@@ -5,6 +5,45 @@ function App() {
   const [image, setImage] = useState(null);
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [listening, setListening] = useState(false);
+
+  const startListening = () => {
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Speech Recognition not supported");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+
+  recognition.lang = "en-US";
+
+  recognition.start();
+
+  setListening(true);
+
+  recognition.onresult = async (event) => {
+
+    const spokenText = event.results[0][0].transcript;
+
+    setQuestion(spokenText);
+
+    setListening(false);
+
+    await askQuestion(spokenText);
+  };
+
+  recognition.onerror = () => {
+    setListening(false);
+    alert("Voice recognition error");
+  };
+};
 
   const handleUpload = async () => {
     if (!image) {
@@ -45,6 +84,43 @@ function App() {
     }
   };
 
+  const askQuestion = async (spokenQuestion) => {
+
+  if (!image) {
+    alert("Please upload image first");
+    return;
+  }
+
+  try {
+
+    const formData = new FormData();
+
+    formData.append("image", image);
+
+    formData.append("question", spokenQuestion);
+
+    const response = await axios.post(
+      "http://localhost:5001/ask-question",
+      formData
+    );
+
+    const aiAnswer = response.data.answer;
+
+    setAnswer(aiAnswer);
+
+    // SPEAK ANSWER
+    const speech = new SpeechSynthesisUtterance(aiAnswer);
+
+    speechSynthesis.speak(speech);
+
+  } catch (error) {
+
+    console.log(error);
+
+    alert("Question answering failed");
+  }
+};
+
   return (
     <div
       style={{
@@ -71,6 +147,31 @@ function App() {
       <button onClick={handleUpload}>
         {loading ? "Analyzing..." : "Describe Image"}
       </button>
+
+      <button onClick={startListening}>
+  {listening ? "Listening..." : "Ask Question by Voice"}
+</button>
+
+{question && (
+  <div>
+    <strong>Your Question:</strong> {question}
+  </div>
+)}
+
+{answer && (
+  <div
+    style={{
+      maxWidth: "700px",
+      padding: "20px",
+      border: "1px solid gray",
+      borderRadius: "10px",
+    }}
+  >
+    <strong>AI Answer:</strong>
+
+    <p>{answer}</p>
+  </div>
+)}
 
       {description && (
         <div
