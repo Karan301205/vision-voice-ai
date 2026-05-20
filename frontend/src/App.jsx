@@ -30,7 +30,7 @@ function App() {
       formData.append("image", image);
 
       const response = await axios.post(
-        "http://localhost:5001/describe-image",
+        "https://vision-backend-vpi0.onrender.com/describe-image",
         formData
       );
 
@@ -68,7 +68,7 @@ function App() {
       formData.append("question", spokenQuestion);
 
       const response = await axios.post(
-        "http://localhost:5001/ask-question",
+        "https://vision-backend-vpi0.onrender.com/ask-question",
         formData
       );
 
