@@ -1,6 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+
+
 function App() {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -30,7 +33,7 @@ function App() {
       formData.append("image", image);
 
       const response = await axios.post(
-        "https://vision-backend-vpi0.onrender.com/describe-image",
+        `${BACKEND_URL}/describe-image`,
         formData
       );
 
@@ -68,7 +71,7 @@ function App() {
       formData.append("question", spokenQuestion);
 
       const response = await axios.post(
-        "https://vision-backend-vpi0.onrender.com/ask-question",
+        `${BACKEND_URL}/ask-question`,
         formData
       );
 

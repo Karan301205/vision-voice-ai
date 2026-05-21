@@ -5,6 +5,8 @@ const axios = require("axios");
 const FormData = require("form-data");
 require("dotenv").config();
 
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://127.0.0.1:8000";
+
 const app = express();
 
 app.use(cors());
@@ -18,7 +20,7 @@ app.post("/describe-image", upload.single("image"), async (req, res) => {
     formData.append("file", req.file.buffer, req.file.originalname);
 
     const response = await axios.post(
-      "https://vision-voice-ai.onrender.com/analyze-image",
+      `${AI_SERVICE_URL}/analyze-image`,
       formData,
       {
         headers: formData.getHeaders(),
@@ -52,7 +54,7 @@ app.post("/ask-question", upload.single("image"), async (req, res) => {
     );
 
     const response = await axios.post(
-      "https://vision-voice-ai.onrender.com/ask-question",
+      `${AI_SERVICE_URL}/ask-question`,
       formData,
       {
         headers: formData.getHeaders(),

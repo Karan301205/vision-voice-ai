@@ -1,19 +1,17 @@
-from fastapi import Form
-from fastapi import FastAPI, UploadFile, File
-from fastapi.middleware.cors import CORSMiddleware
-from PIL import Image
-import google.generativeai as genai
-from dotenv import load_dotenv
+import base64
 import os
+from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+from groq import Groq
 
 load_dotenv(override=True)
 
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+MODEL_NAME = "meta-llama/llama-4-scout-17b-16e-instruct"
 
-model = genai.GenerativeModel("gemini-3.5-flash")
 app = FastAPI()
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,12 +23,14 @@ app.add_middleware(
 
 @app.get("/")
 def home():
-    return {"message": "AI Service Running"}
+    return {"message": "AI Service (Groq) Running"}
 
 @app.post("/analyze-image")
 async def analyze_image(file: UploadFile = File(...)):
-
-    image = Image.open(file.file)
+    image_bytes = await file.read()
+    base64_image = base64.b64encode(image_bytes).decode('utf-8')
+    mime_type = file.content_type or "image/jpeg"
+    data_url = f"data:{mime_type};base64,{base64_image}"
 
     prompt = """
     You are an AI assistant helping blind people understand images.
@@ -49,18 +49,40 @@ async def analyze_image(file: UploadFile = File(...)):
     Focus on practical visual understanding.
     """
 
-    response = model.generate_content([prompt, image])
+    completion = client.chat.completions.create(
+        model=MODEL_NAME,
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": prompt
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": data_url
+                        }
+                    }
+                ]
+            }
+        ]
+    )
 
     return {
-        "description": response.text
+        "description": completion.choices[0].message.content
     }
+
 @app.post("/ask-question")
 async def ask_question(
     file: UploadFile = File(...),
     question: str = Form(...)
 ):
-
-    image = Image.open(file.file)
+    image_bytes = await file.read()
+    base64_image = base64.b64encode(image_bytes).decode('utf-8')
+    mime_type = file.content_type or "image/jpeg"
+    data_url = f"data:{mime_type};base64,{base64_image}"
 
     prompt = f"""
     You are helping blind people understand images.
@@ -72,8 +94,27 @@ async def ask_question(
     Keep the answer short, clear, and conversational.
     """
 
-    response = model.generate_content([prompt, image])
+    completion = client.chat.completions.create(
+        model=MODEL_NAME,
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": prompt
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": data_url
+                        }
+                    }
+                ]
+            }
+        ]
+    )
 
     return {
-        "answer": response.text
+        "answer": completion.choices[0].message.content
     }
