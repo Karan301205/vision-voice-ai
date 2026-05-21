@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://vision-backend-vpi0.onrender.com";
 
 
 function App() {
