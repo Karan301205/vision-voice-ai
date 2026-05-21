@@ -4,7 +4,7 @@ const multer = require("multer");
 const axios = require("axios");
 const FormData = require("form-data");
 require("dotenv").config();
-
+const PORT = process.env.PORT || 5001;
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "https://vision-voice-ai.onrender.com";
 
 const app = express();
@@ -72,6 +72,8 @@ app.post("/ask-question", upload.single("image"), async (req, res) => {
     });
   }
 });
-app.listen(5001, () => {
-  console.log("Backend running on port 5001");
+
+
+app.listen(PORT, () => {
+  console.log(`Backend running on port ${PORT}`);
 });
