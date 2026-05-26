@@ -20,17 +20,18 @@ app.post("/describe-image", upload.single("image"), async (req, res) => {
     formData.append("file", req.file.buffer, req.file.originalname);
 
     const response = await axios.post(
-      `${AI_SERVICE_URL}/analyze-image`,
-      formData,
-      {
-        headers: formData.getHeaders(),
-      }
-    );
+  `${AI_SERVICE_URL}/analyze-image`,
+  formData,
+  {
+    headers: formData.getHeaders(),
+    timeout: 60000,
+  }
+);
 
     res.json(response.data);
 
   } catch (error) {
-    console.log(error);
+    console.log(error.response?.data ||error.message);
     res.status(500).json({
       error: "Something went wrong",
     });
